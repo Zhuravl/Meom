@@ -1,0 +1,121 @@
+name: Build Installers & Upload To Release
+
+on:
+  release:
+    types: [ created ]
+
+jobs:
+  build-linux-installer:
+    name: Build Installer on Linux
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+
+      # SETUP BUILD ENVIRONMENT
+      - id: checkout-code
+        name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: develop
+      - id: setup-jdk
+        name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      # BUILD FOR DISTRIBUTION
+      - id: build
+        name: Build distribution
+        run: |
+          mvn clean package
+          jpackage --input target/ --dest target/ --name Meom --app-version ${{ github.event.release.tag_name }} --description 'Programming tutor for children that allows improving logical thinking and get programming skills in a playful way' --icon src/main/resources/images/icon.png --main-jar Meom-1.0.0-jar-with-dependencies.jar --main-class ua.com.meom.Meom --type deb --linux-shortcut --linux-app-release ${{ github.event.release.tag_name }} --linux-deb-maintainer 'Illia Zhuravskyi <zhuravskyi.illia@gmail.com>' --linux-menu-group Meom
+          ls -as target
+          mv target/meom_${{ github.event.release.tag_name }}-${{ github.event.release.tag_name }}_amd64.deb target/Meom-${{ github.event.release.tag_name }}-Debian_amd64.deb
+      # UPLOAD INSTALLER
+      - id: upload-linux-installer
+        name: Upload Linux installer
+        uses: actions/upload-release-asset@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: target/Meom-${{ github.event.release.tag_name }}-Debian_amd64.deb
+          asset_name: Meom-${{ github.event.release.tag_name }}-Debian_amd64.deb
+          asset_content_type: application/x-binary
+
+
+  build-windows-installer:
+    name: Build Installer on Windows
+    runs-on: windows-latest
+    permissions: write-all
+    steps:
+
+      # SETUP BUILD ENVIRONMENT
+      - id: checkout-code
+        name: Checkout code
+        uses: actions/checkout@v3
+      - id: setup-jdk
+        name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      # BUILD FOR DISTRIBUTION
+      - id: build
+        name: Build distribution
+        run: |
+          mvn clean package
+          jpackage --input target/ --dest target/ --name Meom --app-version ${{ github.event.release.tag_name }} --description 'Programming tutor for children that allows improving logical thinking and get programming skills in a playful way' --icon src/main/resources/images/icon.ico --main-jar Meom-1.0.0-jar-with-dependencies.jar --main-class ua.com.meom.Meom --type msi --win-dir-chooser --win-menu --win-per-user-install --win-shortcut --win-menu-group Meom
+          ls -as target
+          mv target/Meom-${{ github.event.release.tag_name }}.msi target/Meom-${{ github.event.release.tag_name }}-Windows.msi
+      # UPLOAD INSTALLER
+      - id: upload-windows-installer
+        name: Upload Windows installer
+        uses: actions/upload-release-asset@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: target/Meom-${{ github.event.release.tag_name }}-Windows.msi
+          asset_name: Meom-${{ github.event.release.tag_name }}-Windows.msi
+          asset_content_type: application/x-binary
+
+
+  build-macos-installer:
+    name: Build Installer on MacOS
+    runs-on: macos-latest
+    permissions: write-all
+    steps:
+
+      # SETUP BUILD ENVIRONMENT
+      - id: checkout-code
+        name: Checkout code
+        uses: actions/checkout@v3
+      - id: setup-jdk
+        name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: 17
+
+      # BUILD FOR DISTRIBUTION
+      - id: build
+        name: Build distribution
+        run: |
+          mvn clean package
+          jpackage --input target/ --dest target/ --name Meom --app-version ${{ github.event.release.tag_name }} --description 'Programming tutor for children that allows improving logical thinking and get programming skills in a playful way' --icon src/main/resources/images/icon.icns --main-jar Meom-1.0.0-jar-with-dependencies.jar --main-class ua.com.meom.Meom --type pkg
+          ls -as target
+          mv target/Meom-${{ github.event.release.tag_name }}.pkg target/Meom-${{ github.event.release.tag_name }}-macOS.pkg
+      # UPLOAD INSTALLER
+      - id: upload-macos-installer
+        name: Upload MacOS installer
+        uses: actions/upload-release-asset@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: target/Meom-${{ github.event.release.tag_name }}-macOS.pkg
+          asset_name: Meom-${{ github.event.release.tag_name }}-macOS.pkg
+          asset_content_type: application/x-binary
