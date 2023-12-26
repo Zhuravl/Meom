@@ -3,6 +3,7 @@ package ua.com.meom.helpers;
 import ua.com.meom.constants.Constants;
 import ua.com.meom.entities.RankingRecord;
 import ua.com.meom.entities.Settings;
+import ua.com.meom.enums.KeyCommand;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ public class GameContext {
 
     private static Settings settings;
     private static RankingRecord record;
+    private static List<KeyCommand> keyCommandList;
 
     /**
      * Sets the defined settings to context
@@ -124,5 +126,36 @@ public class GameContext {
             e.printStackTrace();
         }
         return resultList;
+    }
+
+    /**
+     * Saves a new key command to the context
+     *
+     * @param command key command to add to list
+     */
+    public static void addKey(KeyCommand command) {
+        if (keyCommandList == null) {
+            keyCommandList = new ArrayList<>();
+        }
+        keyCommandList.add(command);
+    }
+
+    /**
+     * Removes the last key command from the context
+     */
+    public static void removeLastKey() {
+        if (keyCommandList != null && keyCommandList.size() > 0) {
+            keyCommandList.remove(keyCommandList.size() - 1);
+        }
+    }
+
+    /**
+     * Returns the key command list
+     */
+    public static List<KeyCommand> getKeyCommandList() {
+        if (keyCommandList == null) {
+            keyCommandList = new ArrayList<>();
+        }
+        return keyCommandList;
     }
 }

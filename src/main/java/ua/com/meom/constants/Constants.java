@@ -23,20 +23,21 @@ public class Constants {
         public static final int BUTTON_HEIGHT = 100;
         public static final int ELEMENTS_CLEARANCE = 20;
         public static final Font FONT_LOGO = new Font("Tahoma", Font.PLAIN, 100);
+        public static final Font FONT_KEY = new Font("Tahoma", Font.BOLD, 40);
         public static final Font FONT_MAIN = new Font("Tahoma", Font.PLAIN, 26);
         public static final Font FONT_HINT = new Font("Tahoma", Font.PLAIN, 14);
         public static final Color LOGO_COLOR = new Color(213, 211, 209);
     }
 
     public static class Game {
-        public static final int BOARD_SQUARES_HORIZONTAL_NUMBER = 9;
-        public static final int BOARD_SQUARES_VERTICAL_NUMBER = 5;
-        public static final int BOARD_SQUARE_SIDE = 75;
-        public static final Color BOARD_SQUARES_COLOR_BRIGHT = Color.LIGHT_GRAY;
-        public static final Color BOARD_SQUARES_COLOR_DARK = Color.GRAY;
-        public static final int LOGGING_SQUARES_HORIZONTAL_NUMBER = 12;
-        public static final int LOGGING_SQUARES_VERTICAL_NUMBER = 2;
-        public static final int LOGGING_SQUARE_SIDE = 50;
+        public static final int SQUARES_HORIZONTAL_NUMBER_BOARD = 5;
+        public static final int SQUARES_VERTICAL_NUMBER_BOARD = 9;
+        public static final int SQUARE_SIDE_BOARD = 75;
+        public static final Color SQUARES_COLOR_BRIGHT = Color.LIGHT_GRAY;
+        public static final Color SQUARES_COLOR_DARK = Color.GRAY;
+        public static final int SQUARES_HORIZONTAL_NUMBER_LOGGING = 2;
+        public static final int SQUARES_VERTICAL_NUMBER_LOGGING = 16;
+        public static final int SQUARE_SIDE_LOGGING = 50;
     }
 
     public static class Screen {
