@@ -38,6 +38,10 @@ public class Constants {
         public static final int SQUARES_HORIZONTAL_NUMBER_LOGGING = 2;
         public static final int SQUARES_VERTICAL_NUMBER_LOGGING = 16;
         public static final int SQUARE_SIDE_LOGGING = 50;
+        public static final int MILLIS_IN_SECOND = 1000;
+        public static final int MAX_SCORES_PER_LEVEL = 10;
+        public static final int MIN_SCORES_PER_LEVEL = 1;
+        public static final int MIN_TIME_PER_LEVEL = 10;
     }
 
     public static class Screen {

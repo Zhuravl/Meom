@@ -1,6 +1,7 @@
 package ua.com.meom.panels;
 
 import ua.com.meom.constants.Constants;
+import ua.com.meom.entities.RankingRecord;
 import ua.com.meom.entities.RankingTableModel;
 import ua.com.meom.helpers.GameContext;
 
@@ -35,10 +36,12 @@ public class RankingPanel extends JPanel {
 
     /**
      * Refreshes GUI to pull the latest data
+     *
+     * @param record the latest data record
      */
-    public void refreshGUI() {
+    public void refreshGUI(RankingRecord record) {
         RankingTableModel model = (RankingTableModel) rankingTable.getModel();
-        model.refreshData(GameContext.getRecord());
+        model.refreshData(record);
         rankingTable.setRowSelectionInterval(model.getCurrentUserRowIndex(), model.getCurrentUserRowIndex());
         rankingTable.revalidate();
     }

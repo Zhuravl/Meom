@@ -1,7 +1,6 @@
 package ua.com.meom.panels.subpanels;
 
 import ua.com.meom.constants.Constants;
-import ua.com.meom.helpers.GameContext;
 
 import javax.swing.*;
 import java.io.Serial;
@@ -22,21 +21,17 @@ public class InfoBarSubPanel extends JPanel {
         GUI();
     }
 
-    public void setScoreField(int score) {
-        this.scoreField.setText(String.valueOf(score));
-    }
-
-    public void setMistakesBar(int mistakes) {
-        this.mistakesField.setText(String.valueOf(mistakes));
-    }
-
     /**
      * Refreshes GUI to pull the latest data
+     *
+     * @param level    the current level
+     * @param score    the current score
+     * @param mistakes the current mistakes
      */
-    public void refreshGUI() {
-        levelField.setText(String.valueOf(GameContext.getSettings().getLevel()));
-        scoreField.setText(String.valueOf(GameContext.getSettings().getScore()));
-        mistakesField.setText(String.valueOf(GameContext.getSettings().getMistakes()));
+    public void refreshGUI(int level, int score, int mistakes) {
+        levelField.setText(String.valueOf(level));
+        scoreField.setText(String.valueOf(score));
+        mistakesField.setText(String.valueOf(mistakes));
     }
 
     /**

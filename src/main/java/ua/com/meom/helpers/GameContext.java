@@ -150,6 +150,13 @@ public class GameContext {
     }
 
     /**
+     * Removes all key commands from the context
+     */
+    public static void removeAllKeys() {
+        keyCommandList = new ArrayList<>();
+    }
+
+    /**
      * Returns the key command list
      */
     public static List<KeyCommand> getKeyCommandList() {

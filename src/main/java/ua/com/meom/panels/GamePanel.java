@@ -1,6 +1,7 @@
 package ua.com.meom.panels;
 
 import ua.com.meom.constants.Constants;
+import ua.com.meom.entities.Figure;
 import ua.com.meom.enums.KeyCommand;
 import ua.com.meom.helpers.GameContext;
 import ua.com.meom.panels.subpanels.InfoBarSubPanel;
@@ -12,10 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class GamePanel extends JPanel {
 
@@ -24,8 +22,8 @@ public class GamePanel extends JPanel {
     private TableSubPanel tableSubPanel;
     private LoggingSubPanel loggingSubPanel;
     private JButton keyUpButton, keyDownButton, keyLeftButton, keyRightButton, keyCleanUpButton, launchButton, stopButton;
-    private Clip keyUpSound, keyDownSound, keyLeftSound, keyRightSound, keyLaunchSound, keyCleanUpSound;
-
+    private Clip keyUpSound, keyDownSound, keyLeftSound, keyRightSound, keyLaunchSound, keyCleanUpSound, roundWinSound, roundLoseSound;
+    private Calendar startTime;
     private RankingPanel rankingPanel;
 
     public GamePanel(JPanel contentPane, RankingPanel rankingPanel) {
@@ -80,6 +78,14 @@ public class GamePanel extends JPanel {
             AudioInputStream audioInputStreamKeyBackSlash = AudioSystem.getAudioInputStream(Objects.requireNonNull(getClass().getResource("/sounds/keyBackSlash.wav")));
             keyCleanUpSound = AudioSystem.getClip();
             keyCleanUpSound.open(audioInputStreamKeyBackSlash);
+
+            AudioInputStream audioInputStreamWin = AudioSystem.getAudioInputStream(Objects.requireNonNull(getClass().getResource("/sounds/roundWin.wav")));
+            roundWinSound = AudioSystem.getClip();
+            roundWinSound.open(audioInputStreamWin);
+
+            AudioInputStream audioInputStreamLose = AudioSystem.getAudioInputStream(Objects.requireNonNull(getClass().getResource("/sounds/roundLose.wav")));
+            roundLoseSound = AudioSystem.getClip();
+            roundLoseSound.open(audioInputStreamLose);
         } catch (LineUnavailableException | UnsupportedAudioFileException | IOException e) {
             throw new RuntimeException(e);
         }
@@ -88,39 +94,49 @@ public class GamePanel extends JPanel {
     }
 
     /**
-     * Refreshes GUI to pull the latest data and starts the game
+     * Marks level as 'passed' and prepares the next level
      */
-    public void startGame() {
-        infoBarSubPanel.refreshGUI();
-//        gameSubPanel.startGame();
+    public void passLevel() {
+        playRoundWinSound();
+        int scoresForLevel = getCalculatedScores(startTime, Calendar.getInstance(), GameContext.getSettings().getLevel(), GameContext.getSettings().getMistakes());
+        GameContext.getSettings().setScore(GameContext.getSettings().getScore() + scoresForLevel);
+        setNextLevel();
+        prepareLevel();
     }
 
     /**
-     * Starts the next game, increasing the level (if it's available)
+     * Marks level as 'lost' and re-starts the current level
      */
-    public void nextLevel() {
-        int currentLevel = GameContext.getSettings().getLevel();
-        int lastLevel = GameContext.getMaxLevel();
-        if (lastLevel > currentLevel) {
-            //The next level is available - switch to the next level
-            GameContext.getSettings().setLevel(currentLevel + 1);
-        }
-        startGame();
+    public void loseLevel() {
+        playRoundLoseSound();
+        GameContext.getSettings().setMistakes(GameContext.getSettings().getMistakes() + 1);
+        prepareLevel();
     }
 
     /**
-     * Stops the game, saves the results and switches to the next frame
+     * Refreshes GUI to pull the latest data and prepares the level
      */
-    public void stopGame() {
-//        tableSubPanel.stopGame();
-        GameContext.getRecord().setScore(GameContext.getSettings().getScore());
-        GameContext.getRecord().setLevel(GameContext.getSettings().getLevel());
-        GameContext.getRecord().setMistakes(GameContext.getSettings().getMistakes());
-        GameContext.getRecord().setDate(Calendar.getInstance());
-        GameContext.saveRecordToDisk();
-        rankingPanel.refreshGUI();
-        CardLayout cardLayout = (CardLayout) contentPane.getLayout();
-        cardLayout.show(contentPane, Constants.Screen.RANKING);
+    protected void prepareLevel() {
+        infoBarSubPanel.refreshGUI(GameContext.getSettings().getLevel(), GameContext.getSettings().getScore(), GameContext.getSettings().getMistakes());
+        GameContext.removeAllKeys();
+        loggingSubPanel.refreshGUI(GameContext.getKeyCommandList());
+        tableSubPanel.refreshGUI(new Figure(new ImageIcon(Objects.requireNonNull(getClass().getResource("/images/cossack.gif"))).getImage(), 75, 75, 0, 0), Arrays.asList(new Figure(new ImageIcon(Objects.requireNonNull(getClass().getResource("/images/cossack.gif"))).getImage(), 75, 75, 150, 150)), new ArrayList<>());
+        enableAllButtons();
+        startTime = Calendar.getInstance();
+    }
+
+    /**
+     * Enables all buttons on the page
+     */
+    private void enableAllButtons() {
+        setEnabledButtons(true);
+    }
+
+    /**
+     * Disables all buttons on the page
+     */
+    private void disableAllButtons() {
+        setEnabledButtons(false);
     }
 
     /**
@@ -135,7 +151,7 @@ public class GamePanel extends JPanel {
         infoBarSubPanel.setBounds(0, 0, Constants.Common.BUTTON_WIDTH * 2, Constants.Common.BUTTON_HEIGHT);
         this.add(infoBarSubPanel);
 
-        tableSubPanel = new TableSubPanel(Constants.Game.SQUARES_HORIZONTAL_NUMBER_BOARD, Constants.Game.SQUARES_VERTICAL_NUMBER_BOARD, Constants.Game.SQUARE_SIDE_BOARD, Constants.Game.SQUARES_COLOR_BRIGHT, Constants.Game.SQUARES_COLOR_DARK);
+        tableSubPanel = new TableSubPanel(this, Constants.Game.SQUARES_HORIZONTAL_NUMBER_BOARD, Constants.Game.SQUARES_VERTICAL_NUMBER_BOARD, Constants.Game.SQUARE_SIDE_BOARD, Constants.Game.SQUARES_COLOR_BRIGHT, Constants.Game.SQUARES_COLOR_DARK);
         tableSubPanel.setBounds(Constants.Common.ELEMENTS_CLEARANCE, infoBarSubPanel.getY() + infoBarSubPanel.getHeight(), Constants.Game.SQUARE_SIDE_BOARD * Constants.Game.SQUARES_VERTICAL_NUMBER_BOARD, Constants.Game.SQUARE_SIDE_BOARD * Constants.Game.SQUARES_HORIZONTAL_NUMBER_BOARD);
         this.add(tableSubPanel);
 
@@ -146,7 +162,7 @@ public class GamePanel extends JPanel {
             if (GameContext.getKeyCommandList().size() < LOGGING_KEY_MAX) {
                 playButtonSound(KeyCommand.MOVE_RIGHT);
                 GameContext.addKey(KeyCommand.MOVE_RIGHT);
-                loggingSubPanel.refreshUI(GameContext.getKeyCommandList());
+                loggingSubPanel.refreshGUI(GameContext.getKeyCommandList());
             }
         }));
         this.add(keyRightButton);
@@ -157,7 +173,7 @@ public class GamePanel extends JPanel {
         keyCleanUpButton.addActionListener(e -> EventQueue.invokeLater(() -> {
             playButtonSound(KeyCommand.CLEANUP);
             GameContext.removeLastKey();
-            loggingSubPanel.refreshUI(GameContext.getKeyCommandList());
+            loggingSubPanel.refreshGUI(GameContext.getKeyCommandList());
         }));
         this.add(keyCleanUpButton);
 
@@ -168,7 +184,7 @@ public class GamePanel extends JPanel {
             if (GameContext.getKeyCommandList().size() < LOGGING_KEY_MAX) {
                 playButtonSound(KeyCommand.MOVE_LEFT);
                 GameContext.addKey(KeyCommand.MOVE_LEFT);
-                loggingSubPanel.refreshUI(GameContext.getKeyCommandList());
+                loggingSubPanel.refreshGUI(GameContext.getKeyCommandList());
             }
         }));
         this.add(keyLeftButton);
@@ -180,7 +196,7 @@ public class GamePanel extends JPanel {
             if (GameContext.getKeyCommandList().size() < LOGGING_KEY_MAX) {
                 playButtonSound(KeyCommand.MOVE_UP);
                 GameContext.addKey(KeyCommand.MOVE_UP);
-                loggingSubPanel.refreshUI(GameContext.getKeyCommandList());
+                loggingSubPanel.refreshGUI(GameContext.getKeyCommandList());
             }
         }));
         this.add(keyUpButton);
@@ -192,7 +208,7 @@ public class GamePanel extends JPanel {
             if (GameContext.getKeyCommandList().size() < LOGGING_KEY_MAX) {
                 playButtonSound(KeyCommand.MOVE_DOWN);
                 GameContext.addKey(KeyCommand.MOVE_DOWN);
-                loggingSubPanel.refreshUI(GameContext.getKeyCommandList());
+                loggingSubPanel.refreshGUI(GameContext.getKeyCommandList());
             }
         }));
         this.add(keyDownButton);
@@ -201,8 +217,9 @@ public class GamePanel extends JPanel {
         launchButton.setFont(Constants.Common.FONT_MAIN);
         launchButton.setBounds(keyLeftButton.getX(), keyDownButton.getY() + keyDownButton.getHeight() + Constants.Common.ELEMENTS_CLEARANCE, Constants.Common.BUTTON_HEIGHT * 3 + Constants.Common.ELEMENTS_CLEARANCE, Constants.Common.BUTTON_HEIGHT);
         launchButton.addActionListener(e -> EventQueue.invokeLater(() -> {
+            disableAllButtons();
             playButtonSound(KeyCommand.LAUNCH);
-            startGame();
+            tableSubPanel.launchCode(GameContext.getKeyCommandList());
         }));
         this.add(launchButton);
 
@@ -210,7 +227,14 @@ public class GamePanel extends JPanel {
         stopButton.setFont(Constants.Common.FONT_MAIN);
         stopButton.setBounds(Constants.Common.ELEMENTS_CLEARANCE, Constants.Common.MAIN_WINDOW_HEIGHT - Constants.Common.BUTTON_HEIGHT - Constants.Common.ELEMENTS_CLEARANCE, Constants.Common.BUTTON_HEIGHT * 2, Constants.Common.BUTTON_HEIGHT);
         stopButton.addActionListener(e -> EventQueue.invokeLater(() -> {
-            stopGame();
+            GameContext.getRecord().setScore(GameContext.getSettings().getScore());
+            GameContext.getRecord().setLevel(GameContext.getSettings().getLevel());
+            GameContext.getRecord().setMistakes(GameContext.getSettings().getMistakes());
+            GameContext.getRecord().setDate(Calendar.getInstance());
+            GameContext.saveRecordToDisk();
+            rankingPanel.refreshGUI(GameContext.getRecord());
+            CardLayout cardLayout = (CardLayout) contentPane.getLayout();
+            cardLayout.show(contentPane, Constants.Screen.RANKING);
         }));
         this.add(stopButton);
 
@@ -220,9 +244,18 @@ public class GamePanel extends JPanel {
     }
 
     /**
+     * Returns the calculated scores for the current round
+     */
+    private int getCalculatedScores(Calendar startTime, Calendar stopTime, int level, int mistakes) {
+        long timeDifference = stopTime.getTimeInMillis() - startTime.getTimeInMillis();
+        int timeInSeconds = (int) (timeDifference / Constants.Game.MILLIS_IN_SECOND);
+        return Math.max((level * Constants.Game.MAX_SCORES_PER_LEVEL) - ((timeInSeconds * (mistakes + 1)) - Constants.Game.MIN_TIME_PER_LEVEL), Constants.Game.MIN_SCORES_PER_LEVEL);
+    }
+
+    /**
      * Plays the Round Lose sound if the sound preferences is set to on
      */
-    public void playButtonSound(KeyCommand key) {
+    private void playButtonSound(KeyCommand key) {
         if (GameContext.getSettings().isSoundOn()) {
             switch (key) {
                 case MOVE_RIGHT -> {
@@ -251,6 +284,53 @@ public class GamePanel extends JPanel {
                 }
                 default -> throw new IllegalArgumentException("Can't recognize sound for the key - " + key + "!");
             }
+        }
+    }
+
+    /**
+     * Plays the Round Win sound if the sound preferences is set to on
+     */
+    private void playRoundWinSound() {
+        if (GameContext.getSettings().isSoundOn()) {
+            roundWinSound.setMicrosecondPosition(0);
+            roundWinSound.start();
+        }
+    }
+
+    /**
+     * Plays the Round Lose sound if the sound preferences is set to on
+     */
+    private void playRoundLoseSound() {
+        if (GameContext.getSettings().isSoundOn()) {
+            roundLoseSound.setMicrosecondPosition(0);
+            roundLoseSound.start();
+        }
+    }
+
+    /**
+     * Sets the enabled state of the buttons
+     *
+     * @param enabled the state to set
+     */
+    private void setEnabledButtons(boolean enabled) {
+        keyUpButton.setEnabled(enabled);
+        keyDownButton.setEnabled(enabled);
+        keyLeftButton.setEnabled(enabled);
+        keyRightButton.setEnabled(enabled);
+        keyCleanUpButton.setEnabled(enabled);
+        launchButton.setEnabled(enabled);
+        stopButton.setEnabled(enabled);
+    }
+
+    /**
+     * Increases the level (if it's available), otherwise does nothing
+     */
+    private void setNextLevel() {
+        int currentLevel = GameContext.getSettings().getLevel();
+        int lastLevel = GameContext.getMaxLevel();
+        if (lastLevel > currentLevel) {
+            //The next level is available - switch to the next level
+            GameContext.getSettings().setLevel(currentLevel + 1);
         }
     }
 }

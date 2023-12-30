@@ -28,11 +28,10 @@ public class LoggingSubPanel extends JPanel {
         this.setLayout(null);
     }
 
-
     /**
      * Refreshes GUI to pull the latest data
      */
-    public void refreshUI(List<KeyCommand> keyCommandList) {
+    public void refreshGUI(List<KeyCommand> keyCommandList) {
         this.keyCommandList = keyCommandList;
         repaint();
     }

@@ -86,7 +86,7 @@ public class BriefingPanel extends JPanel {
         startButton.addActionListener(e -> EventQueue.invokeLater(() -> {
             CardLayout cardLayout = (CardLayout) contentPane.getLayout();
             cardLayout.show(contentPane, Constants.Screen.GAME);
-            gamePanel.startGame();
+            gamePanel.prepareLevel();
         }));
         this.add(startButton);
     }
