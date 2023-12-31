@@ -14,10 +14,9 @@ public class TableSubPanel extends JPanel {
     @Serial
     private static final long serialVersionUID = 1L;
     private final int TIMER_DELAY = 40;
-    private int reachesCount = 0;
 
     private GamePanel gamePanel;
-    private int sideSize, lineNumber, columnNumber, stepIndex, commandIndex;
+    private int sideSize, lineNumber, columnNumber, stepIndex, commandIndex, reachesCount;
     private Color colorBright, colorDark;
     private List<KeyCommand> keyCommands;
     private Figure hero;
@@ -34,6 +33,7 @@ public class TableSubPanel extends JPanel {
         this.colorDark = colorDark;
         this.stepIndex = 0;
         this.commandIndex = 0;
+        this.reachesCount = 0;
         this.setLayout(null);
 
         timer = new Timer(TIMER_DELAY, e -> {
@@ -53,6 +53,9 @@ public class TableSubPanel extends JPanel {
         this.hero = hero;
         this.aims = aims;
         this.barriers = barriers;
+        this.stepIndex = 0;
+        this.commandIndex = 0;
+        this.reachesCount = 0;
         repaint();
     }
 
@@ -109,20 +112,30 @@ public class TableSubPanel extends JPanel {
      * Move the Hero using the list of commands
      */
     private void moveHero() {
-        if (commandIndex >= keyCommands.size()) {
-            // The Hero has used all his steps (but has not reach aims) - lose the level
+        if (reachesCount == aims.size()) {
+            // The Hero has reached all aims - pass the level
             timer.stop();
-            gamePanel.loseLevel();
+            stepIndex = 0;
+            commandIndex = 0;
+            reachesCount = 0;
+            gamePanel.passLevel();
         } else {
-            if (reachesCount == aims.size()) {
-                // The Hero has reached all aims - pass the level
+            // The Hero has still not reached all aims - continue moving
+            if (isHeroHitBarrier()) {
+                // The Hero has hit a barrier - lose the level
                 timer.stop();
-                gamePanel.passLevel();
+                stepIndex = 0;
+                commandIndex = 0;
+                reachesCount = 0;
+                gamePanel.loseLevel();
             } else {
-                // The Hero has still not reached all aims - continue moving
-                if (isHeroHitBarrier()) {
-                    // The Hero has hit a barrier - lose the level
+                // The Hero has not hit a barrier - continue moving
+                if (commandIndex >= keyCommands.size()) {
+                    // The Hero has used all his steps (but has not reach aims) - lose the level
                     timer.stop();
+                    stepIndex = 0;
+                    commandIndex = 0;
+                    reachesCount = 0;
                     gamePanel.loseLevel();
                 } else {
                     // The Hero has not hit a barrier and needs to continue moving to aims
