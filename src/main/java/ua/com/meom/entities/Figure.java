@@ -7,15 +7,16 @@ public class Figure {
     private Image view;
     private int height;
     private int width;
-    private int x;
-    private int y;
+    private Coordinate coordinate;
 
-    public Figure(Image view, int height, int width, int x, int y) {
+    public Figure() {
+    }
+
+    public Figure(Image view, int height, int width, Coordinate coordinate) {
         this.view = view;
         this.height = height;
         this.width = width;
-        this.x = x;
-        this.y = y;
+        this.coordinate = coordinate;
     }
 
     public Image getView() {
@@ -42,19 +43,11 @@ public class Figure {
         this.width = width;
     }
 
-    public int getX() {
-        return x;
+    public Coordinate getCoordinate() {
+        return coordinate;
     }
 
-    public void setX(int x) {
-        this.x = x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public void setY(int y) {
-        this.y = y;
+    public void setCoordinate(Coordinate coordinate) {
+        this.coordinate = coordinate;
     }
 }

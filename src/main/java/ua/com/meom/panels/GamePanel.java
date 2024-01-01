@@ -4,6 +4,7 @@ import ua.com.meom.constants.Constants;
 import ua.com.meom.entities.Figure;
 import ua.com.meom.enums.KeyCommand;
 import ua.com.meom.helpers.GameContext;
+import ua.com.meom.helpers.GameHelper;
 import ua.com.meom.panels.subpanels.InfoBarSubPanel;
 import ua.com.meom.panels.subpanels.LoggingSubPanel;
 import ua.com.meom.panels.subpanels.TableSubPanel;
@@ -13,6 +14,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.List;
 import java.util.*;
 
 public class GamePanel extends JPanel {
@@ -120,7 +122,10 @@ public class GamePanel extends JPanel {
         infoBarSubPanel.refreshGUI(GameContext.getSettings().getLevel(), GameContext.getSettings().getScore(), GameContext.getSettings().getMistakes());
         GameContext.removeAllKeys();
         loggingSubPanel.refreshGUI(GameContext.getKeyCommandList());
-        tableSubPanel.refreshGUI(new Figure(new ImageIcon(Objects.requireNonNull(getClass().getResource("/images/cossack.gif"))).getImage(), 75, 75, 0, 0), Arrays.asList(new Figure(new ImageIcon(Objects.requireNonNull(getClass().getResource("/images/cossack.gif"))).getImage(), 75, 75, 150, 150)), new ArrayList<>());
+        Figure hero = GameHelper.getHero(Constants.Game.SQUARES_VERTICAL_NUMBER_BOARD, Constants.Game.SQUARES_HORIZONTAL_NUMBER_BOARD, Constants.Game.SQUARE_SIDE_BOARD);
+        List<Figure> aims = GameHelper.getAims(Constants.Game.SQUARES_VERTICAL_NUMBER_BOARD, Constants.Game.SQUARES_HORIZONTAL_NUMBER_BOARD, Constants.Game.SQUARE_SIDE_BOARD, GameContext.getSettings().getLevel(), hero.getCoordinate());
+        List<Figure> barriers = GameHelper.getBarriers(Constants.Game.SQUARES_VERTICAL_NUMBER_BOARD, Constants.Game.SQUARES_HORIZONTAL_NUMBER_BOARD, Constants.Game.SQUARE_SIDE_BOARD, GameContext.getSettings().getLevel(), GameHelper.getExistingCoordinatesList(hero, aims));
+        tableSubPanel.refreshGUI(hero, aims, barriers);
         enableAllButtons();
         startTime = Calendar.getInstance();
     }

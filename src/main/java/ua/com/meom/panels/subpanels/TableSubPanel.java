@@ -89,20 +89,20 @@ public class TableSubPanel extends JPanel {
         // Draw barriers for the hero
         if (barriers != null) {
             for (Figure barrier : barriers) {
-                g.drawImage(barrier.getView(), barrier.getX(), barrier.getY(), barrier.getWidth(), barrier.getHeight(), this);
+                g.drawImage(barrier.getView(), barrier.getCoordinate().getX(), barrier.getCoordinate().getY(), barrier.getWidth(), barrier.getHeight(), this);
             }
         }
 
         // Draw hero's aims
         if (aims != null) {
             for (Figure aim : aims) {
-                g.drawImage(aim.getView(), aim.getX(), aim.getY(), aim.getWidth(), aim.getHeight(), this);
+                g.drawImage(aim.getView(), aim.getCoordinate().getX(), aim.getCoordinate().getY(), aim.getWidth(), aim.getHeight(), this);
             }
         }
 
         // Draw hero
         if (hero != null) {
-            g.drawImage(hero.getView(), hero.getX(), hero.getY(), hero.getWidth(), hero.getHeight(), this);
+            g.drawImage(hero.getView(), hero.getCoordinate().getX(), hero.getCoordinate().getY(), hero.getWidth(), hero.getHeight(), this);
         }
         g.dispose();
     }
@@ -139,8 +139,8 @@ public class TableSubPanel extends JPanel {
                     gamePanel.loseLevel();
                 } else {
                     // The Hero has not hit a barrier and needs to continue moving to aims
-                    hero.setX(hero.getX() + keyCommands.get(commandIndex).getKeyX());
-                    hero.setY(hero.getY() + keyCommands.get(commandIndex).getKeyY());
+                    hero.getCoordinate().setX(hero.getCoordinate().getX() + keyCommands.get(commandIndex).getKeyX());
+                    hero.getCoordinate().setY(hero.getCoordinate().getY() + keyCommands.get(commandIndex).getKeyY());
                     stepIndex += 1;
 
                     // Check if the Hero reaches an aim
@@ -164,8 +164,8 @@ public class TableSubPanel extends JPanel {
      */
     private boolean isHeroReachAim() {
         for (Figure aim : aims) {
-            if ((hero.getX() + (hero.getWidth() / 2)) == (aim.getX() + (aim.getWidth() / 2)) &&
-                    (hero.getY() + (hero.getHeight() / 2)) == (aim.getY() + (aim.getHeight() / 2))) {
+            if ((hero.getCoordinate().getX() + (hero.getWidth() / 2)) == (aim.getCoordinate().getX() + (aim.getWidth() / 2)) &&
+                    (hero.getCoordinate().getY() + (hero.getHeight() / 2)) == (aim.getCoordinate().getY() + (aim.getHeight() / 2))) {
                 // Collision detected
                 return true;
             }
@@ -180,10 +180,10 @@ public class TableSubPanel extends JPanel {
     private boolean isHeroHitBarrier() {
         if (barriers != null && barriers.size() > 0) {
             for (Figure barrier : barriers) {
-                if (hero.getX() < barrier.getX() + barrier.getWidth() &&
-                        hero.getX() + hero.getWidth() > barrier.getX() &&
-                        hero.getY() < barrier.getY() + barrier.getHeight() &&
-                        hero.getY() + hero.getHeight() > barrier.getY()) {
+                if (hero.getCoordinate().getX() < barrier.getCoordinate().getX() + barrier.getWidth() &&
+                        hero.getCoordinate().getX() + hero.getWidth() > barrier.getCoordinate().getX() &&
+                        hero.getCoordinate().getY() < barrier.getCoordinate().getY() + barrier.getHeight() &&
+                        hero.getCoordinate().getY() + hero.getHeight() > barrier.getCoordinate().getY()) {
                     // Collision detected
                     return true;
                 }
